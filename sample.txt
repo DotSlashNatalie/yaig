@@ -1,0 +1,16 @@
+version 1
+
+object local	127.0.0.1
+
+object shodan1 198.20.69.96/29
+object shodan-io2 66.240.192.0/18
+object shodan-io3 71.6.128.0/17
+
+group shodan
+	object shodan1
+	object shodan-io2
+	object shodan-io3
+	
+	
+server group shodan drop
+server object local accept
