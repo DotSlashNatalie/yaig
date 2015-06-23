@@ -30,7 +30,7 @@ class Struct:
 NET_DIRECTION = enum("SERVER", "CLIENT")
 FIREWALL_ACTION = enum("ACCEPT", "DROP", "REJECT")
 NET_SOURCE = enum("ADDRESS", "GROUP")
-TYPES = enum("GROUP", "ADDR", "PROTO")
+TYPES = enum("GROUP", "ADDR", "PROTO", "WILDCARD")
 
 class RuleStruct(Struct):
     direction = None
@@ -94,6 +94,10 @@ def getIPsInGroup(group):
             returnlst.extend(getIPsInGroup(i.value))
         elif i.object_type == TYPES.ADDR:
             returnlst.append(object_defs[i.value])
+        elif i.object_type == TYPES.WILDCARD:
+            for obj in object_defs.iterkeys():
+                if obj.startswith(i.value):
+                    returnlst.append(object_defs[obj])
     return returnlst
 
 try:
@@ -108,7 +112,10 @@ try:
             if CURRENT_STATE == PARSER_STATES.GLOBAL:
                 object_defs[parts[1]] = parts[2]
             elif CURRENT_STATE == PARSER_STATES.GROUP_DEF:
-                group_defs[current_group].append(ObjectType(object_type=TYPES.ADDR, value=parts[1])) # initilize the dct on group entry...
+                if parts[1][len(parts[1]) - 1] == "+":
+                    group_defs[current_group].append(ObjectType(object_type=TYPES.WILDCARD, value=parts[1].strip("+"))) # initilize the dct on group entry...
+                else:
+                    group_defs[current_group].append(ObjectType(object_type=TYPES.ADDR, value=parts[1])) # initilize the dct on group entry...
         elif parts[0] == "group":
             if CURRENT_STATE == PARSER_STATES.GROUP_DEF:
                 group_defs[current_group].append(ObjectType(object_type=TYPES.GROUP, value=parts[1]))
@@ -127,7 +134,10 @@ try:
             if parts[1] == "group":
                 source = ObjectType(object_type=TYPES.GROUP, value=parts[2])
             elif parts[1] == "object":
-                source = ObjectType(object_type=TYPES.ADDR, value=parts[2])
+                if parts[2][len(parts[2]) - 1] == "+":
+                    source = ObjectType(object_type=TYPES.WILDCARD, value=parts[2].strip("+"))
+                else:
+                    source = ObjectType(object_type=TYPES.ADDR, value=parts[2])
             elif parts[1] == "proto":
                 source = ObjectType(object_type=TYPES.PROTO, value=parts[2])
             if CURRENT_STATE == PARSER_STATES.GLOBAL:
