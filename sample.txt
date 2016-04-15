@@ -11,6 +11,8 @@ group shodan
 	object shodan-io2
 	object shodan-io3
 	
-	
+
 server group shodan drop
 server object local accept
+server proto 25 drop
+server proto 842 drop

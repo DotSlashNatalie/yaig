@@ -173,7 +173,7 @@ try:
                     for ip in getIPsInGroup(rule.source.value):
                         generated_ruleset.append(ruletpl % (iface, ip, action, rule))
                 elif rule.source.object_type == TYPES.PROTO:
-                    generated_ruleset.append("-A INPUT -i %s -p %s -j %s -m comment --comment \"%s\"" % (iface, rule.source.value, action, rule))
+                    generated_ruleset.append("-A INPUT -i %s -p tcp --destination-port %s -j %s -m comment --comment \"%s\"" % (iface, rule.source.value, action, rule))
 
     for rule in global_defs:
         if rule.direction == NET_DIRECTION.SERVER:
@@ -193,7 +193,7 @@ try:
                 for ip in getIPsInGroup(rule.source.value):
                     generated_ruleset.append(ruletpl % (ip, action, rule))
             elif rule.source.object_type == TYPES.PROTO:
-                generated_ruleset.append("-A INPUT -i %s -p %s -j %s -m comment --comment \"%s\"" % (rule.source.value, action, rule))
+                generated_ruleset.append("-A INPUT -p tcp --destination-port %s -j %s -m comment --comment \"%s\"" % (rule.source.value, action, rule))
 
     for rule in generated_ruleset:
         print rule
